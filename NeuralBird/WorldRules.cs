@@ -15,7 +15,7 @@ namespace NeuralBird
         public const int JumpRecharge = 10;
 
         // pipe rules
-        public const float PipeGap = 50f;
+        public const float PipeGap = 100f;
         public const float PipeSpeed = 3f;
         public const int NumberOfPipes = 3;
 

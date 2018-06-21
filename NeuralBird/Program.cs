@@ -17,6 +17,7 @@ namespace NeuralBird
         public static Color backgroundColor = Color.White;
         public static List<GameObject> gameObjects = new List<GameObject>();
         public static Random rand = new Random();
+        //public static float points = 0f;
 
         static void Main(string[] args)
         {
@@ -42,7 +43,6 @@ namespace NeuralBird
             // END DEBUG
 
             MainLoop();
-            string str = Console.ReadLine();
         }
 
         private static void EventKeyPressed(object sender, KeyEventArgs e)

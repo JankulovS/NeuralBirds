@@ -48,8 +48,8 @@ namespace NeuralBird
             SpriteBottom.Position = Position;
             SpriteTop.Position = Position;
 
-            SpriteBottom.Position += new Vector2f(0, WorldRules.PipeGap);
-            SpriteTop.Position += new Vector2f(0, - WorldRules.PipeGap);
+            SpriteBottom.Position += new Vector2f(0, WorldRules.PipeGap / 2);
+            SpriteTop.Position += new Vector2f(0, - WorldRules.PipeGap / 2);
 
             Program.mainWindow.Draw(SpriteBottom);
             Program.mainWindow.Draw(SpriteTop);
