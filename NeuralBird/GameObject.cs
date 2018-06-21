@@ -36,14 +36,16 @@ namespace NeuralBird
             }
         }
 
+        // main loop update function which updates position logic (velocity, position, out of bounds...)
         public void Update()
         {
-            // tick reset jump
+            // jump tick reset
             if (JumpRecharge > 0)
             {
                 JumpRecharge--;
             }
 
+            // apply position change
             Velocity += new Vector2f(0, WorldRules.Gravity);
             if (Velocity.Y > WorldRules.MaxSpeed)
             {
@@ -64,9 +66,11 @@ namespace NeuralBird
             }
         }
 
+        // this function renders the gameobject
         public void Render()
         {
             Sprite.Position = Position;
+            Sprite.Rotation = (float)Math.Asin(Velocity.Y / (WorldRules.MaxSpeed * 1.5)) * (float)(180/Math.PI);
             Program.mainWindow.Draw(Sprite);
         }
     }
