@@ -54,6 +54,9 @@ namespace NeuralBird
                     {
                         // collision detected!
                         IsDead = true;
+
+                        // check if player playing
+                        Program.playerAlive = false;
                     }
                 }
             }
