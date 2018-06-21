@@ -14,20 +14,54 @@ namespace NeuralBird
         public Sprite Sprite { get; set; }
         public Vector2f Velocity { get; set; }
 
+        public int JumpRecharge;
+
         public GameObject()
         {
             Velocity = new Vector2f(0, 0);
+            JumpRecharge = 0;
         }
 
         public void Jump()
         {
-            Velocity += new Vector2f(0, WorldRules.JumpForce);
+            if (JumpRecharge == 0)
+            {
+                Velocity += new Vector2f(0, WorldRules.JumpForce);
+                if (Velocity.Y < -WorldRules.MaxSpeed)
+                {
+                    Velocity = new Vector2f(0, -WorldRules.MaxSpeed);
+                }
+                JumpRecharge = WorldRules.JumpRecharge;
+
+            }
         }
 
         public void Update()
         {
+            // tick reset jump
+            if (JumpRecharge > 0)
+            {
+                JumpRecharge--;
+            }
+
             Velocity += new Vector2f(0, WorldRules.Gravity);
+            if (Velocity.Y > WorldRules.MaxSpeed)
+            {
+                Velocity = new Vector2f(0, WorldRules.MaxSpeed);
+            }
             Position += Velocity;
+
+            // out of bounds check
+            if (Position.Y < 0)
+            {
+                Position = new Vector2f(Position.X, 0);
+                Velocity = new Vector2f(0, 0);
+            }
+            if (Position.Y > WorldRules.WindowHeight)
+            {
+                Position = new Vector2f(Position.X, WorldRules.WindowHeight);
+                Velocity = new Vector2f(0, 0);
+            }
         }
 
         public void Render()

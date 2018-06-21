@@ -29,6 +29,7 @@ namespace NeuralBird
             obj.Sprite = new Sprite();
             Texture texture = new Texture(Directory.GetCurrentDirectory() + "/data/bird.png");
             obj.Sprite.Texture = texture;
+            obj.Sprite.Origin = new Vector2f(16, 16);
             obj.Position = new Vector2f(100, 100);
             gameObjects.Add(obj);
 
