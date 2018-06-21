@@ -29,6 +29,16 @@ namespace NeuralBird
             Bird obj = new Bird();
             gameObjects.Add(obj);
 
+            var pipe = new Pipe();
+            pipe.Position += new Vector2f(0, 0);
+            gameObjects.Add(pipe);
+            pipe = new Pipe();
+            pipe.Position += new Vector2f(333, 0);
+            gameObjects.Add(pipe);
+            pipe = new Pipe();
+            pipe.Position += new Vector2f(666, 0);
+            gameObjects.Add(pipe);
+
             // END DEBUG
 
             MainLoop();
@@ -80,6 +90,20 @@ namespace NeuralBird
             foreach(var obj in gameObjects)
             {
                 obj.Update();
+            }
+
+            for(int i = 0; i < gameObjects.Count; i++)
+            {
+                if(gameObjects.ElementAt(i) is Pipe)
+                {
+                    var obj = gameObjects.ElementAt(i) as Pipe;
+                    if (obj.ForDeletion)
+                    {
+                        gameObjects.RemoveAt(i);
+                        var pipe = new Pipe();
+                        gameObjects.Add(pipe);
+                    }
+                }
             }
         }
 
