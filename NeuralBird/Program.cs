@@ -16,6 +16,7 @@ namespace NeuralBird
         public static RenderWindow mainWindow;
         public static Color backgroundColor = Color.White;
         public static List<GameObject> gameObjects = new List<GameObject>();
+        public static Random rand = new Random();
 
         static void Main(string[] args)
         {
@@ -25,12 +26,7 @@ namespace NeuralBird
             mainWindow.SetFramerateLimit(60);
 
             // DEBUG
-            GameObject obj = new GameObject();
-            obj.Sprite = new Sprite();
-            Texture texture = new Texture(Directory.GetCurrentDirectory() + "/data/bird.png");
-            obj.Sprite.Texture = texture;
-            obj.Sprite.Origin = new Vector2f(16, 16);
-            obj.Position = new Vector2f(100, 100);
+            Bird obj = new Bird();
             gameObjects.Add(obj);
 
             // END DEBUG
@@ -43,7 +39,15 @@ namespace NeuralBird
         {
             if (e.Code == Keyboard.Key.Space)
             {
-                gameObjects.ElementAt(0).Jump();
+                
+                foreach(var obj in gameObjects)
+                {
+                    if (obj is Bird)
+                    {
+                        var obj2 = obj as Bird;
+                        obj2.Jump();
+                    }
+                }
             }
         }
 
