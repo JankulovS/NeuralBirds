@@ -52,8 +52,8 @@
     <Reference Include="MathNet.Numerics, Version=3.17.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.3.17.0\lib\net40\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="Neural.NET, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Neural.NET.1.0.2\lib\Neural.NET.dll</HintPath>
+    <Reference Include="NeuralNetwork, Version=7.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NeuralNetwork.7.4.0\lib\net451\NeuralNetwork.dll</HintPath>
     </Reference>
     <Reference Include="sfmlnet-audio-2, Version=2.1.0.0, Culture=neutral, processorArchitecture=x86">
       <HintPath>..\packages\SFML.Net.2.1.5\lib\sfmlnet-audio-2.dll</HintPath>
@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bird.cs" />
+    <Compile Include="Brain.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="Pipe.cs" />
     <Compile Include="Program.cs" />

@@ -13,6 +13,7 @@ namespace NeuralBird
     {
         public int Points;
         public bool IsDead;
+        public Brain brain;
 
         public Bird()
         {
@@ -27,7 +28,13 @@ namespace NeuralBird
             Sprite.Texture = texture;
             Sprite.Origin = new Vector2f(16, 16);
             Sprite.Color = new Color((byte)(Program.rand.Next() % 255), (byte)(Program.rand.Next() % 255), (byte)(Program.rand.Next() % 255));
-            Position = new Vector2f(100, 100);
+            Position = new Vector2f(100, 200);
+
+            // if neural network plays
+            if (!Program.isPlayerPlaying)
+            {
+                brain = new Brain();
+            }
         }
 
         public void Jump()
@@ -48,17 +55,21 @@ namespace NeuralBird
         {
             foreach (var obj in Program.gameObjects)
             {
-                if ((obj.Position.X - 32) - (Position.X + 16) < 0 && (obj.Position.X + 32) - (Position.X - 16) > 0)
+                if (obj is Pipe)
                 {
-                    if (Math.Sqrt(Math.Pow(obj.Position.X - Position.X, 2) + Math.Pow(obj.Position.Y - Position.Y, 2)) > WorldRules.PipeGap - 16)
+                    if ((obj.Position.X - 32) - (Position.X + 16) < 0 && (obj.Position.X + 32) - (Position.X - 16) > 0)
                     {
-                        // collision detected!
-                        IsDead = true;
+                        if (Math.Sqrt(Math.Pow(obj.Position.X - Position.X, 2) + Math.Pow(obj.Position.Y - Position.Y, 2)) > WorldRules.PipeGap - 16)
+                        {
+                            // collision detected!
+                            IsDead = true;
 
-                        // check if player playing
-                        Program.playerAlive = false;
+                            // check if player playing
+                            Program.playerAlive = false;
+                        }
                     }
                 }
+                
             }
         }
 
@@ -66,7 +77,38 @@ namespace NeuralBird
         {
 
             // points for being alive
-            Points++;
+            if (IsDead == false) Points++;
+
+            double closestPipeDist = 999;
+            double closestPipeY = 0;
+
+            foreach(var obj in Program.gameObjects)
+            {
+                if (obj is Pipe)
+                {
+                    if (obj.Position.X - Position.X < closestPipeDist)
+                    {
+                        if (obj.Position.X - Position.X < 0)
+                            continue;
+                        closestPipeDist = obj.Position.X - Position.X;
+                        closestPipeY = obj.Position.Y;
+                    }
+                }
+            }
+
+            
+            if (!Program.isPlayerPlaying)
+            {
+                int decision = brain.Think(Position.Y, closestPipeDist, closestPipeY, Velocity.Y);
+                switch (decision)
+                {
+                    case 0:
+                        Jump();
+                        break;
+                    case 1:
+                        break;
+                }
+            }
 
 
             // jump tick reset
@@ -88,11 +130,17 @@ namespace NeuralBird
             {
                 Position = new Vector2f(Position.X, 0);
                 Velocity = new Vector2f(0, 0);
+
+                IsDead = true;
+                Program.playerAlive = false;
             }
             if (Position.Y > WorldRules.WindowHeight)
             {
                 Position = new Vector2f(Position.X, WorldRules.WindowHeight);
                 Velocity = new Vector2f(0, 0);
+
+                IsDead = true;
+                Program.playerAlive = false;
             }
 
             CheckForCollision();

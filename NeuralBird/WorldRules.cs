@@ -19,6 +19,9 @@ namespace NeuralBird
         public const float PipeSpeed = 3f;
         public const int NumberOfPipes = 3;
 
+        // neural network rules
+        public const int BirdsPerGeneration = 150;
+
         // window rules
         public const uint WindowHeight = 600;
         public const uint WindowWidth = 1000;

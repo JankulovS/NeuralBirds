@@ -1,4 +1,6 @@
-﻿using SFML.Graphics;
+﻿using ArtificialNeuralNetwork;
+using ArtificialNeuralNetwork.Factories;
+using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -20,13 +22,19 @@ namespace NeuralBird
         public static bool playerAlive = true;
         public static int playerPoints = 0;
         public static Bird playerBird = null;
+        public static bool isPlayerPlaying = false;
         public static Text score;
+        public static int numberOfAliveBirds = 0;
+        public static List<Bird> deadBirds = new List<Bird>();
 
         static void Main(string[] args)
         {
+
+
+            PlayerChoiceMenu();
+
+
             mainWindow = new RenderWindow(new VideoMode(WorldRules.WindowWidth, WorldRules.WindowHeight), "Neural Bird");
-            mainWindow.Closed += EventClosed;
-            mainWindow.KeyPressed += EventKeyPressed;
             mainWindow.SetFramerateLimit(60);
             score = new Text();
             score.Position = new Vector2f(60, WorldRules.WindowHeight - 60);
@@ -35,8 +43,16 @@ namespace NeuralBird
             score.Font = font;
             score.CharacterSize = 32;
             score.DisplayedString = playerPoints.ToString();
+            mainWindow.Closed += EventClosed;
 
-            playerAlive = true;
+            // player plays
+            if (isPlayerPlaying)
+            {
+                mainWindow.KeyPressed += EventKeyPressed;
+                playerAlive = true;
+            }
+
+
 
             // DEBUG
             ResetGame();
@@ -44,6 +60,42 @@ namespace NeuralBird
             // END DEBUG
 
             MainLoop();
+        }
+
+        private static void PlayerChoiceMenu()
+        {
+            int i = 0;
+
+            while(i == 0)
+            {
+                Console.Clear();
+                Console.WriteLine("-- NEURAL NETWORK FLAPPY BIRD --");
+                Console.WriteLine("1 - play flappy bird yourself");
+                Console.WriteLine("2 - let neural network play");
+                Console.Write(" >> ");
+                string input = Console.ReadLine();
+
+
+                try
+                {
+                    i = Convert.ToInt32(input);
+                    switch(i)
+                    {
+                        case 1:
+                            isPlayerPlaying = true;
+                            break;
+                        case 2:
+                            isPlayerPlaying = false;
+                            break;
+
+                    }
+
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
         }
 
         private static void EventKeyPressed(object sender, KeyEventArgs e)
@@ -88,9 +140,14 @@ namespace NeuralBird
 
         public static void UpdateWorld()
         {
-            if (playerAlive == false)
+            if (playerAlive == false && isPlayerPlaying == true)
             {
                 ResetGame();
+            }
+
+            if (numberOfAliveBirds <= 0 && isPlayerPlaying == false)
+            {
+                NewGeneration();
             }
 
             foreach(var obj in gameObjects)
@@ -112,16 +169,88 @@ namespace NeuralBird
                         gameObjects.Add(pipe);
                     }
                 }
+                else
+                {
+                    // store dead birds for good neural networks
+                    var obj = gameObjects.ElementAt(i) as Bird;
+                    if (obj.IsDead)
+                    {
+                        gameObjects.RemoveAt(i);
+                        numberOfAliveBirds--;
+                        deadBirds.Add(obj);
+                    }
+                }
             }
+        }
+
+        private static void NewGeneration()
+        {
+            gameObjects.Clear();
+
+            // sort by points
+            deadBirds = deadBirds.OrderBy(o => o.Points).ToList();
+            deadBirds.Reverse();
+
+            Bird obj;
+            for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+            {
+                obj = new Bird();
+
+                int chosenBirdBrain = i / 2;
+
+                INeuralNetwork network;
+                network = NeuralNetworkFactory.GetInstance().Create(deadBirds.ElementAt(chosenBirdBrain).brain.network.GetGenes());
+                obj.brain.network = network;
+
+
+                obj.brain.Mutate();
+                gameObjects.Add(obj);
+                playerBird = obj;
+            }
+            numberOfAliveBirds = WorldRules.BirdsPerGeneration;
+
+            //for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+            //{
+            //    var obj = new Bird();
+            //    gameObjects.Add(obj);
+            //}
+            //numberOfAliveBirds = WorldRules.BirdsPerGeneration;
+
+            var pipe = new Pipe();
+            pipe.Position += new Vector2f(0, 0);
+            gameObjects.Add(pipe);
+            pipe = new Pipe();
+            pipe.Position += new Vector2f(333, 0);
+            gameObjects.Add(pipe);
+            pipe = new Pipe();
+            pipe.Position += new Vector2f(666, 0);
+            gameObjects.Add(pipe);
+
+            playerAlive = true;
+            deadBirds = new List<Bird>();
         }
 
         private static void ResetGame()
         {
             gameObjects.Clear();
 
-            Bird obj = new Bird();
-            gameObjects.Add(obj);
-            playerBird = obj;
+            if (isPlayerPlaying)
+            {
+                Bird obj = new Bird();
+                gameObjects.Add(obj);
+                playerBird = obj;
+            }
+            else
+            {
+                Bird obj;
+                for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+                {
+                    obj = new Bird();
+                    gameObjects.Add(obj);
+                    playerBird = obj;
+                }
+                numberOfAliveBirds = WorldRules.BirdsPerGeneration;
+            }
 
             var pipe = new Pipe();
             pipe.Position += new Vector2f(0, 0);
@@ -140,12 +269,17 @@ namespace NeuralBird
         {
             mainWindow.Clear(Color.White);
 
+            // render all gameobjects
             foreach(var obj in gameObjects)
             {
                 obj.Render();
             }
+
+            // update ui
             score.DisplayedString = playerPoints.ToString();
             mainWindow.Draw(score);
+
+
             mainWindow.Display();
         }
     }
