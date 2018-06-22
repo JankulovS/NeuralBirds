@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NeuralBird
 {
-    class Bird : GameObject
+    public class Bird : GameObject
     {
         public int Points;
         public bool IsDead;

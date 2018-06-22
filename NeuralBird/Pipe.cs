@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NeuralBird
 {
-    class Pipe : GameObject
+    public class Pipe : GameObject
     {
         public Sprite SpriteBottom;
         public Sprite SpriteTop;

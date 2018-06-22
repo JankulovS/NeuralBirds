@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NeuralBird
 {
-    class GameObject
+    public class GameObject
     {
         public Vector2f Position { get; set; }
         public Sprite Sprite { get; set; }
