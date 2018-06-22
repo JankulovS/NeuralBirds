@@ -28,7 +28,7 @@ namespace NeuralBird
 
 
 
-            var numInputs = 5;
+            var numInputs = 4;
             var numOutputs = 1;
             var numHiddenLayers = 1;
             var numNeuronsInHiddenLayer = 10;
@@ -48,7 +48,7 @@ namespace NeuralBird
         // this function returns the network's prediction (0 or 1)
         public int Think(double birdY, double dist, double pipeY, double verticalSpeed)
         {
-            double[] inputs = { birdY / WorldRules.WindowHeight, dist / WorldRules.WindowWidth, (pipeY - WorldRules.PipeGap / 2)/ WorldRules.WindowHeight, (pipeY + WorldRules.PipeGap / 2) / WorldRules.WindowHeight, verticalSpeed / WorldRules.MaxSpeed};
+            double[] inputs = { birdY / WorldRules.WindowHeight, dist / WorldRules.WindowWidth, pipeY/ WorldRules.WindowHeight, verticalSpeed / WorldRules.MaxSpeed};
             //double[] inputs = { birdY, dist, pipeY, verticalSpeed };
             network.SetInputs(inputs);
             network.Process();
@@ -77,7 +77,7 @@ namespace NeuralBird
                     var gene = genes.HiddenGenes.ElementAt(i);
                     for (int j = 0; j < genes.HiddenGenes.Count; j++)
                     {
-                    if (rand.NextDouble() < 0.3)
+                    if (rand.NextDouble() < 0.2)
                     {
                         var neuron = gene.Neurons.ElementAt(j);
                         List<double> newWeightsAxon = new List<double>();
