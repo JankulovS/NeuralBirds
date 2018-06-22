@@ -155,7 +155,10 @@ namespace NeuralBird
                 obj.Update();
             }
 
-            playerPoints = playerBird.Points;
+            if (isPlayerPlaying)
+                playerPoints = playerBird.Points;
+            else
+                playerPoints = ((Bird)gameObjects.ElementAt(0)).Points;
 
             for(int i = 0; i < gameObjects.Count; i++)
             {
@@ -186,26 +189,66 @@ namespace NeuralBird
         private static void NewGeneration()
         {
             gameObjects.Clear();
+            double maxScore = 0;
+
+            double scoreSum = 0;
+            foreach (var bird in deadBirds)
+            {
+                if (bird.Points > maxScore)
+                {
+                    maxScore = bird.Points;
+                }
+                scoreSum += bird.Points;
+            }
+
+
 
             // sort by points
-            deadBirds = deadBirds.OrderBy(o => o.Points).ToList();
-            deadBirds.Reverse();
+            //deadBirds = deadBirds.OrderBy(o => o.Points).ToList();
+            //deadBirds.Reverse();
 
-            Bird obj;
+            List<KeyValuePair<Bird, double>> elements = new List<KeyValuePair<Bird, double>>();
+            foreach (Bird bird in deadBirds)
+            {
+                elements.Add(new KeyValuePair<Bird, double>(bird, bird.Points / scoreSum));
+            }
+
+
+
+
+            Bird obj = null;
             for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
             {
-                obj = new Bird();
+                Bird bird = new Bird();
 
-                int chosenBirdBrain = i / 2;
-
-                INeuralNetwork network;
-                network = NeuralNetworkFactory.GetInstance().Create(deadBirds.ElementAt(chosenBirdBrain).brain.network.GetGenes());
-                obj.brain.network = network;
+                double diceRoll = rand.NextDouble();
 
 
-                obj.brain.Mutate();
-                gameObjects.Add(obj);
-                playerBird = obj;
+                double cumulative = 0.0;
+                for (int j = 0; j < elements.Count; j++)
+                {
+                    cumulative += elements[j].Value;
+                    if (diceRoll < cumulative)
+                    {
+                        obj = elements[j].Key;
+                        break;
+                    }
+                }
+
+                //int chosenBirdBrain = i / 2;
+
+                //INeuralNetwork network;
+                //network = NeuralNetworkFactory.GetInstance().Create(deadBirds.ElementAt(chosenBirdBrain).brain.network.GetGenes());
+                //obj.brain.network = network;
+
+                bird.brain.SetGenes(obj.brain.network.GetGenes());
+                bird.brain.Mutate();
+                if (maxScore < 200)
+                {
+                    bird = new Bird();
+                }
+                gameObjects.Add(bird);
+                playerBird = bird;
             }
             numberOfAliveBirds = WorldRules.BirdsPerGeneration;
 
@@ -227,7 +270,7 @@ namespace NeuralBird
             gameObjects.Add(pipe);
 
             playerAlive = true;
-            deadBirds = new List<Bird>();
+            deadBirds.Clear();
         }
 
         private static void ResetGame()

@@ -14,6 +14,8 @@ namespace NeuralBird
         public int Points;
         public bool IsDead;
         public Brain brain;
+        private static int next_id = 0;
+        private int id;
 
         public Bird()
         {
@@ -21,6 +23,7 @@ namespace NeuralBird
             JumpRecharge = 0;
             Points = 0;
             IsDead = false;
+            id = next_id++;
 
 
             Sprite = new Sprite();
@@ -100,10 +103,13 @@ namespace NeuralBird
             if (!Program.isPlayerPlaying)
             {
                 int decision = brain.Think(Position.Y, closestPipeDist, closestPipeY, Velocity.Y);
+                //Console.WriteLine("Bird id: " + id + "  output: "+brain.network.GetOutputs()[0]);
+                //Console.WriteLine("PipeY: " + closestPipeY + " BirdY: " + Position.Y + "\nBirdVelocity: " + Velocity.Y);
                 switch (decision)
                 {
                     case 0:
                         Jump();
+                        
                         break;
                     case 1:
                         break;
@@ -151,6 +157,16 @@ namespace NeuralBird
             Sprite.Position = Position;
             Sprite.Rotation = (float)Math.Asin(Velocity.Y / (WorldRules.MaxSpeed * 1.5)) * (float)(180 / Math.PI);
             Program.mainWindow.Draw(Sprite);
+        }
+
+        internal void ResetState()
+        {
+            Position = new Vector2f(100, 200);
+            Velocity = new Vector2f(0, 0);
+            IsDead = false;
+            Points = 0;
+            JumpRecharge = 0;
+            brain = new Brain();
         }
     }
 }
