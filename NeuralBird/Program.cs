@@ -24,8 +24,10 @@ namespace NeuralBird
         public static Bird playerBird = null;
         public static bool isPlayerPlaying = false;
         public static Text score;
+        public static Text highScore;
         public static int numberOfAliveBirds = 0;
         public static List<Bird> deadBirds = new List<Bird>();
+        public static int highScorePoints = 0;
 
         static void Main(string[] args)
         {
@@ -37,12 +39,18 @@ namespace NeuralBird
             mainWindow = new RenderWindow(new VideoMode(WorldRules.WindowWidth, WorldRules.WindowHeight), "Neural Bird");
             mainWindow.SetFramerateLimit(60);
             score = new Text();
-            score.Position = new Vector2f(60, WorldRules.WindowHeight - 60);
+            score.Position = new Vector2f(60, WorldRules.WindowHeight - 100);
             score.Color = Color.Black;
             Font font = new Font(Directory.GetCurrentDirectory() + "/data/font.ttf");
             score.Font = font;
             score.CharacterSize = 32;
             score.DisplayedString = playerPoints.ToString();
+            highScore = new Text();
+            highScore.Position = new Vector2f(60, WorldRules.WindowHeight - 60);
+            highScore.Color = Color.Black;
+            highScore.Font = font;
+            highScore.CharacterSize = 32;
+            highScore.DisplayedString = playerPoints.ToString();
             mainWindow.Closed += EventClosed;
 
             // player plays
@@ -156,11 +164,22 @@ namespace NeuralBird
             }
 
             if (isPlayerPlaying)
+            {
                 playerPoints = playerBird.Points;
+            }
+            
             else
+            {
                 playerPoints = ((Bird)gameObjects.ElementAt(0)).Points;
+            }
 
-            for(int i = 0; i < gameObjects.Count; i++)
+
+            if (playerPoints > highScorePoints)
+            {
+                highScorePoints = playerPoints;
+            }
+
+            for (int i = 0; i < gameObjects.Count; i++)
             {
                 if(gameObjects.ElementAt(i) is Pipe)
                 {
@@ -321,6 +340,8 @@ namespace NeuralBird
             // update ui
             score.DisplayedString = playerPoints.ToString();
             mainWindow.Draw(score);
+            highScore.DisplayedString = highScorePoints.ToString();
+            mainWindow.Draw(highScore);
 
 
             mainWindow.Display();

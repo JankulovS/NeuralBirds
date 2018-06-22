@@ -30,8 +30,8 @@ namespace NeuralBird
 
             var numInputs = 4;
             var numOutputs = 1;
-            var numHiddenLayers = 1;
-            var numNeuronsInHiddenLayer = 10;
+            var numHiddenLayers = 2;
+            var numNeuronsInHiddenLayer = 6;
             network = NeuralNetworkFactory.GetInstance().Create(numInputs, numOutputs, numHiddenLayers, numNeuronsInHiddenLayer);
         }
 
@@ -77,13 +77,13 @@ namespace NeuralBird
                     var gene = genes.HiddenGenes.ElementAt(i);
                     for (int j = 0; j < genes.HiddenGenes.Count; j++)
                     {
-                    if (rand.NextDouble() < 0.2)
+                    if (rand.NextDouble() < 0.1)
                     {
                         var neuron = gene.Neurons.ElementAt(j);
                         List<double> newWeightsAxon = new List<double>();
                         foreach (var weight in neuron.Axon.Weights)
                         {
-                            if (rand.NextDouble() > 0.1)
+                            if (rand.NextDouble() < 0.1)
                             {
                                 if (rand.NextDouble() > 0.5)
                                     newWeightsAxon.Add(weight + 0.1);
