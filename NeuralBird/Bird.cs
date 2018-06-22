@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace NeuralBird
 {
-    class Bird : GameObject
+    public class Bird : GameObject
     {
         public int Points;
         public bool IsDead;
@@ -107,11 +107,11 @@ namespace NeuralBird
                 //Console.WriteLine("PipeY: " + closestPipeY + " BirdY: " + Position.Y + "\nBirdVelocity: " + Velocity.Y);
                 switch (decision)
                 {
-                    case 0:
+                    case 1:
                         Jump();
                         
                         break;
-                    case 1:
+                    case 0:
                         break;
                 }
             }

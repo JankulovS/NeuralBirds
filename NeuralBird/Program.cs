@@ -1,5 +1,6 @@
 ﻿using ArtificialNeuralNetwork;
 using ArtificialNeuralNetwork.Factories;
+using ArtificialNeuralNetwork.Genes;
 using SFML.Graphics;
 using SFML.Window;
 using System;
@@ -8,10 +9,21 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace NeuralBird
 {
+    public class Gene
+    {
+        public List<List<double>> Weights;
+        public List<double> Bias;
 
+        public Gene()
+        {
+            Weights = new List<List<double>>();
+            Bias = new List<double>();
+        }
+    }
 
     class Program
     {
@@ -28,6 +40,7 @@ namespace NeuralBird
         public static int numberOfAliveBirds = 0;
         public static List<Bird> deadBirds = new List<Bird>();
         public static int highScorePoints = 0;
+        public static bool isPretrained = false;
 
         static void Main(string[] args)
         {
@@ -78,7 +91,8 @@ namespace NeuralBird
                 Console.Clear();
                 Console.WriteLine("-- NEURAL NETWORK FLAPPY BIRD --");
                 Console.WriteLine("1 - play flappy bird yourself");
-                Console.WriteLine("2 - let neural network play");
+                Console.WriteLine("2 - let neural network learn how to play");
+                Console.WriteLine("3 - let pretrained neural network play");
                 Console.Write(" >> ");
                 string input = Console.ReadLine();
 
@@ -94,7 +108,10 @@ namespace NeuralBird
                         case 2:
                             isPlayerPlaying = false;
                             break;
-
+                        case 3:
+                            isPlayerPlaying = false;
+                            isPretrained = true;
+                            break;
                     }
 
                 }
@@ -145,8 +162,103 @@ namespace NeuralBird
                     Console.WriteLine("Speed now " + WorldRules.SimulationsPerUpdate + "00%");
                 }
             }
+
+            if (e.Code == Keyboard.Key.S && isPlayerPlaying == false)
+            {
+                SaveNetworks();
+            }
         }
 
+        private static void SaveNetworks()
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(List<Gene>));
+            var fStream = new FileStream(Directory.GetCurrentDirectory() + "/data/saved.brains", FileMode.Create, FileAccess.Write, FileShare.None);
+            List<Gene> newHiddenGenes = new List<Gene>(); ;
+
+            // alive birds
+            foreach (var bird in gameObjects)
+            {
+                if (bird is Bird)
+                {
+
+                    var hiddenGenes = ((Bird)bird).brain.network.GetGenes().HiddenGenes;
+                    Gene newGene;
+                    foreach(var gene in hiddenGenes)
+                    {
+                        newGene = new Gene();
+                        var newWeights = new List<List<Double>>();
+                        var newBias = new List<Double>();
+                        foreach(var neuron in gene.Neurons)
+                        {
+                            newWeights.Add(neuron.Axon.Weights.ToList());
+                            newBias.Add(neuron.Soma.Bias);
+                        }
+                        newGene.Bias = newBias;
+                        newGene.Weights = newWeights;
+
+                        newHiddenGenes.Add(newGene);
+                    }
+                }
+            }
+
+            // dead birds
+            foreach (var bird in deadBirds)
+            {
+                if (bird is Bird)
+                {
+
+                    var hiddenGenes = ((Bird)bird).brain.network.GetGenes().HiddenGenes;
+                    Gene newGene;
+                    foreach (var gene in hiddenGenes)
+                    {
+                        newGene = new Gene();
+                        var newWeights = new List<List<Double>>();
+                        var newBias = new List<Double>();
+                        foreach (var neuron in gene.Neurons)
+                        {
+                            newWeights.Add(neuron.Axon.Weights.ToList());
+                            newBias.Add(neuron.Soma.Bias);
+                        }
+                        newGene.Bias = newBias;
+                        newGene.Weights = newWeights;
+
+                        newHiddenGenes.Add(newGene);
+                    }
+                }
+            }
+
+            ser.Serialize(fStream, newHiddenGenes);
+            fStream.Close();
+
+            Console.WriteLine("Current network network genes saved!");
+        }
+
+        private static void LoadNetworks()
+        {
+            XmlSerializer ser = new XmlSerializer(typeof(List<Gene>));
+            var fStream = new FileStream(Directory.GetCurrentDirectory() + "/data/saved.brains", FileMode.Open, FileAccess.Read, FileShare.None);
+            List<Gene> newGenes = (List < Gene > )ser.Deserialize(fStream);
+            int counter = 0;
+
+            foreach (var bird in gameObjects)
+            {
+                if (bird is Bird)
+                {
+                    var genes = ((Bird)bird).brain.network.GetGenes();
+                    foreach(var gene in genes.HiddenGenes)
+                    {
+                        for(int j = 0; j < gene.Neurons.Count; j++)
+                        {
+                            gene.Neurons.ElementAt(j).Axon.Weights = newGenes.ElementAt(counter).Weights.ElementAt(j);
+                            gene.Neurons.ElementAt(j).Soma.Bias = newGenes.ElementAt(counter).Bias.ElementAt(j);
+                        }
+                    }
+                    counter++;
+                }
+            }
+
+            Console.WriteLine("Loaded neural network genes");
+        }
 
         private static void EventClosed(object sender, EventArgs e)
         {
@@ -157,8 +269,6 @@ namespace NeuralBird
         {
             while (mainWindow.IsOpen())
             {
-                // Process events
-                mainWindow.DispatchEvents();
 
 
                 // update logic loop
@@ -168,6 +278,8 @@ namespace NeuralBird
                 // update graphics
                 UpdateGraphics();
 
+                // Process events
+                mainWindow.DispatchEvents();
             }
 
         }
@@ -330,13 +442,29 @@ namespace NeuralBird
             }
             else
             {
-                Bird obj;
-                for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+                if (isPretrained)
                 {
-                    obj = new Bird();
-                    gameObjects.Add(obj);
-                    playerBird = obj;
+                    Bird obj;
+                    for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+                    {
+                        obj = new Bird();
+                        gameObjects.Add(obj);
+                        playerBird = obj;
+                    }
+
+                    LoadNetworks();
                 }
+                else
+                {
+                    Bird obj;
+                    for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+                    {
+                        obj = new Bird();
+                        gameObjects.Add(obj);
+                        playerBird = obj;
+                    }
+                }
+                
                 numberOfAliveBirds = WorldRules.BirdsPerGeneration;
             }
 
