@@ -83,7 +83,7 @@ namespace NeuralBird
                         List<double> newWeightsAxon = new List<double>();
                         foreach (var weight in neuron.Axon.Weights)
                         {
-                            if (rand.NextDouble() < 0.1)
+                            if (rand.NextDouble() < 0.05)
                             {
                                 if (rand.NextDouble() > 0.5)
                                     newWeightsAxon.Add(weight + 0.1);

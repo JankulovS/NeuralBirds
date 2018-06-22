@@ -39,14 +39,14 @@ namespace NeuralBird
             mainWindow = new RenderWindow(new VideoMode(WorldRules.WindowWidth, WorldRules.WindowHeight), "Neural Bird");
             mainWindow.SetFramerateLimit(60);
             score = new Text();
-            score.Position = new Vector2f(60, WorldRules.WindowHeight - 100);
+            score.Position = new Vector2f(20, WorldRules.WindowHeight - 100);
             score.Color = Color.Black;
             Font font = new Font(Directory.GetCurrentDirectory() + "/data/font.ttf");
             score.Font = font;
             score.CharacterSize = 32;
             score.DisplayedString = playerPoints.ToString();
             highScore = new Text();
-            highScore.Position = new Vector2f(60, WorldRules.WindowHeight - 60);
+            highScore.Position = new Vector2f(20, WorldRules.WindowHeight - 60);
             highScore.Color = Color.Black;
             highScore.Font = font;
             highScore.CharacterSize = 32;
@@ -56,11 +56,10 @@ namespace NeuralBird
             // player plays
             if (isPlayerPlaying)
             {
-                mainWindow.KeyPressed += EventKeyPressed;
                 playerAlive = true;
             }
-
-
+            
+            mainWindow.KeyPressed += EventKeyPressed;
 
             // DEBUG
             ResetGame();
@@ -108,7 +107,7 @@ namespace NeuralBird
 
         private static void EventKeyPressed(object sender, KeyEventArgs e)
         {
-            if (e.Code == Keyboard.Key.Space)
+            if (e.Code == Keyboard.Key.Space && isPlayerPlaying)
             {
                 
                 foreach(var obj in gameObjects)
@@ -118,6 +117,32 @@ namespace NeuralBird
                         var obj2 = obj as Bird;
                         obj2.Jump();
                     }
+                }
+            }
+            if (e.Code == Keyboard.Key.Add && isPlayerPlaying == false)
+            {
+                WorldRules.SimulationsPerUpdate++;
+                if (WorldRules.SimulationsPerUpdate > 10)
+                {
+                    WorldRules.SimulationsPerUpdate = 10;
+                }
+                else
+                {
+                    Console.WriteLine("Speed now " + WorldRules.SimulationsPerUpdate + "00%");
+                }
+            }
+
+            if (e.Code == Keyboard.Key.Subtract && isPlayerPlaying == false)
+            {
+                WorldRules.SimulationsPerUpdate--;
+                if (WorldRules.SimulationsPerUpdate < 1)
+                {
+                    WorldRules.SimulationsPerUpdate = 1;
+                }
+                else
+                {
+
+                    Console.WriteLine("Speed now " + WorldRules.SimulationsPerUpdate + "00%");
                 }
             }
         }
@@ -137,7 +162,8 @@ namespace NeuralBird
 
 
                 // update logic loop
-                UpdateWorld();
+                for (int i = 0; i < WorldRules.SimulationsPerUpdate; i++)
+                    UpdateWorld();
 
                 // update graphics
                 UpdateGraphics();
@@ -338,9 +364,9 @@ namespace NeuralBird
             }
 
             // update ui
-            score.DisplayedString = playerPoints.ToString();
+            score.DisplayedString = "Current: " + playerPoints.ToString();
             mainWindow.Draw(score);
-            highScore.DisplayedString = highScorePoints.ToString();
+            highScore.DisplayedString = "Best:      " + highScorePoints.ToString();
             mainWindow.Draw(highScore);
 
 

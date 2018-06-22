@@ -25,5 +25,8 @@ namespace NeuralBird
         // window rules
         public const uint WindowHeight = 600;
         public const uint WindowWidth = 1000;
+        public static int SimulationsPerUpdate = 1;
+    
+        
     }
 }
