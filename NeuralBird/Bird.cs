@@ -107,11 +107,11 @@ namespace NeuralBird
                 //Console.WriteLine("PipeY: " + closestPipeY + " BirdY: " + Position.Y + "\nBirdVelocity: " + Velocity.Y);
                 switch (decision)
                 {
-                    case 1:
+                    case 0:
                         Jump();
                         
                         break;
-                    case 0:
+                    case 1:
                         break;
                 }
             }

@@ -176,56 +176,56 @@ namespace NeuralBird
             List<Gene> newHiddenGenes = new List<Gene>(); ;
 
             // alive birds
-            foreach (var bird in gameObjects)
-            {
-                if (bird is Bird)
-                {
+            //foreach (var bird in gameObjects)
+            //{
+            //    if (bird is Bird)
+            //    {
 
-                    var hiddenGenes = ((Bird)bird).brain.network.GetGenes().HiddenGenes;
-                    Gene newGene;
-                    foreach(var gene in hiddenGenes)
-                    {
-                        newGene = new Gene();
-                        var newWeights = new List<List<Double>>();
-                        var newBias = new List<Double>();
-                        foreach(var neuron in gene.Neurons)
-                        {
-                            newWeights.Add(neuron.Axon.Weights.ToList());
-                            newBias.Add(neuron.Soma.Bias);
-                        }
-                        newGene.Bias = newBias;
-                        newGene.Weights = newWeights;
+            //        var hiddenGenes = ((Bird)bird).brain.Network.GetGenes().HiddenGenes;
+            //        Gene newGene;
+            //        foreach(var gene in hiddenGenes)
+            //        {
+            //            newGene = new Gene();
+            //            var newWeights = new List<List<Double>>();
+            //            var newBias = new List<Double>();
+            //            foreach(var neuron in gene.Neurons)
+            //            {
+            //                newWeights.Add(neuron.Axon.Weights.ToList());
+            //                newBias.Add(neuron.Soma.Bias);
+            //            }
+            //            newGene.Bias = newBias;
+            //            newGene.Weights = newWeights;
 
-                        newHiddenGenes.Add(newGene);
-                    }
-                }
-            }
+            //            newHiddenGenes.Add(newGene);
+            //        }
+            //    }
+            //}
 
             // dead birds
-            foreach (var bird in deadBirds)
-            {
-                if (bird is Bird)
-                {
+            //foreach (var bird in deadBirds)
+            //{
+            //    if (bird is Bird)
+            //    {
 
-                    var hiddenGenes = ((Bird)bird).brain.network.GetGenes().HiddenGenes;
-                    Gene newGene;
-                    foreach (var gene in hiddenGenes)
-                    {
-                        newGene = new Gene();
-                        var newWeights = new List<List<Double>>();
-                        var newBias = new List<Double>();
-                        foreach (var neuron in gene.Neurons)
-                        {
-                            newWeights.Add(neuron.Axon.Weights.ToList());
-                            newBias.Add(neuron.Soma.Bias);
-                        }
-                        newGene.Bias = newBias;
-                        newGene.Weights = newWeights;
+            //        var hiddenGenes = ((Bird)bird).brain.Network.GetGenes().HiddenGenes;
+            //        Gene newGene;
+            //        foreach (var gene in hiddenGenes)
+            //        {
+            //            newGene = new Gene();
+            //            var newWeights = new List<List<Double>>();
+            //            var newBias = new List<Double>();
+            //            foreach (var neuron in gene.Neurons)
+            //            {
+            //                newWeights.Add(neuron.Axon.Weights.ToList());
+            //                newBias.Add(neuron.Soma.Bias);
+            //            }
+            //            newGene.Bias = newBias;
+            //            newGene.Weights = newWeights;
 
-                        newHiddenGenes.Add(newGene);
-                    }
-                }
-            }
+            //            newHiddenGenes.Add(newGene);
+            //        }
+            //    }
+            //}
 
             ser.Serialize(fStream, newHiddenGenes);
             fStream.Close();
@@ -240,22 +240,22 @@ namespace NeuralBird
             List<Gene> newGenes = (List < Gene > )ser.Deserialize(fStream);
             int counter = 0;
 
-            foreach (var bird in gameObjects)
-            {
-                if (bird is Bird)
-                {
-                    var genes = ((Bird)bird).brain.network.GetGenes();
-                    foreach(var gene in genes.HiddenGenes)
-                    {
-                        for(int j = 0; j < gene.Neurons.Count; j++)
-                        {
-                            gene.Neurons.ElementAt(j).Axon.Weights = newGenes.ElementAt(counter).Weights.ElementAt(j);
-                            gene.Neurons.ElementAt(j).Soma.Bias = newGenes.ElementAt(counter).Bias.ElementAt(j);
-                        }
-                    }
-                    counter++;
-                }
-            }
+            //foreach (var bird in gameObjects)
+            //{
+            //    if (bird is Bird)
+            //    {
+            //        var genes = ((Bird)bird).brain.Network.GetGenes();
+            //        foreach(var gene in genes.HiddenGenes)
+            //        {
+            //            for(int j = 0; j < gene.Neurons.Count; j++)
+            //            {
+            //                gene.Neurons.ElementAt(j).Axon.Weights = newGenes.ElementAt(counter).Weights.ElementAt(j);
+            //                gene.Neurons.ElementAt(j).Soma.Bias = newGenes.ElementAt(counter).Bias.ElementAt(j);
+            //            }
+            //        }
+            //        counter++;
+            //    }
+            //}
 
             Console.WriteLine("Loaded neural network genes");
         }
@@ -398,8 +398,8 @@ namespace NeuralBird
                 //network = NeuralNetworkFactory.GetInstance().Create(deadBirds.ElementAt(chosenBirdBrain).brain.network.GetGenes());
                 //obj.brain.network = network;
 
-                bird.brain.SetGenes(obj.brain.network.GetGenes());
-                bird.brain.Mutate();
+                //bird.brain.SetGenes(obj.brain.Network.GetGenes());
+                //bird.brain.Mutate();
                 if (maxScore < 200)
                 {
                     bird = new Bird();
