@@ -45,30 +45,33 @@ namespace NeuralBird
         static void Main(string[] args)
         {
 
-
-            PlayerChoiceMenu();
-
-
-            mainWindow = new RenderWindow(new VideoMode(WorldRules.WindowWidth, WorldRules.WindowHeight), "Neural Bird");
-            mainWindow.SetFramerateLimit(60);
-
-            InitUI();
-
-            
-            mainWindow.Closed += EventClosed;
-
-            // player plays
-            if (isPlayerPlaying)
+            while(true)
             {
-                playerAlive = true;
+                PlayerChoiceMenu();
+
+
+                mainWindow = new RenderWindow(new VideoMode(WorldRules.WindowWidth, WorldRules.WindowHeight), "Neural Bird");
+                mainWindow.SetFramerateLimit(60);
+
+                InitUI();
+
+
+                mainWindow.Closed += EventClosed;
+
+                // player plays
+                if (isPlayerPlaying)
+                {
+                    playerAlive = true;
+                }
+
+                mainWindow.KeyPressed += EventKeyPressed;
+
+
+                ResetGame();
+
+                MainLoop();
             }
             
-            mainWindow.KeyPressed += EventKeyPressed;
-
-
-            ResetGame();
-
-            MainLoop();
         }
 
         private static void InitUI()
@@ -106,7 +109,6 @@ namespace NeuralBird
         private static void PlayerChoiceMenu()
         {
             int i = 0;
-
             while(i == 0)
             {
                 Console.Clear();
@@ -147,7 +149,8 @@ namespace NeuralBird
                                 "The overall best bird of all previous generations is always picked.\n\n\n" +
                                 "If the player is playing the game, jumping is done by hitting the Space key.\n" +
                                 "Game simulation speed can be altered with the plus and minus keys while the network plays.\n" +
-                                "All birds' network behaviour can be saved with the S key at any time while the network plays. This will save to the default save file (saved.brains). This will override the previous network save\n\n" +
+                                "All birds' network behaviour can be saved with the S key at any time while the network plays. This will save to the default save file (saved.brains). This will override the previous network save.\n" +
+                                "The birds can also be loaded with already trained networks with the third option in the menu. This will load all birds with already (relatively) good trained networks. They will still continue evolving.\n\n" +
                                 "Press any key to continue");
                             Console.ReadKey();
                             i = 0;
@@ -269,8 +272,22 @@ namespace NeuralBird
 
         private static void EventClosed(object sender, EventArgs e)
         {
-            Environment.Exit(0);
-        }
+            //Environment.Exit(0);
+            mainWindow.Close();
+
+            
+            gameObjects = new List<GameObject>();
+            rand = new Random();
+            playerAlive = true;
+            playerPoints = 0;
+            playerBird = null;
+            isPlayerPlaying = false;
+            numberOfAliveBirds = 0;
+            deadBirds = new List<Bird>();
+            highScorePoints = 0;
+            isPretrained = false;
+            bestNetworkWeightsAlltime = null;
+    }
 
         static void MainLoop()
         {
