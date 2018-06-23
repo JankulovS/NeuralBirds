@@ -17,6 +17,7 @@ namespace NeuralBird
 
         }
 
+        // converts NN data to serializable object
         public SerializableWeights(WeightsInfo weights)
         {
             weights1 = new List<List<double>>();
@@ -43,6 +44,7 @@ namespace NeuralBird
             }
         }
 
+        // converts back into NN data
         public WeightsInfo ToWeightsInfo()
         {
             WeightsInfo weights = new WeightsInfo();

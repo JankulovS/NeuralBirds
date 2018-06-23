@@ -1,7 +1,4 @@
-﻿using ArtificialNeuralNetwork;
-using ArtificialNeuralNetwork.Factories;
-using ArtificialNeuralNetwork.Genes;
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.Window;
 using System;
 using System.Collections.Generic;
@@ -36,6 +33,8 @@ namespace NeuralBird
         public static Bird playerBird = null;
         public static bool isPlayerPlaying = false;
         public static Text score;
+        public static Text help;
+        public static Text help2;
         public static Text highScore;
         public static int numberOfAliveBirds = 0;
         public static List<Bird> deadBirds = new List<Bird>();
@@ -52,19 +51,10 @@ namespace NeuralBird
 
             mainWindow = new RenderWindow(new VideoMode(WorldRules.WindowWidth, WorldRules.WindowHeight), "Neural Bird");
             mainWindow.SetFramerateLimit(60);
-            score = new Text();
-            score.Position = new Vector2f(20, WorldRules.WindowHeight - 100);
-            score.Color = Color.Black;
-            Font font = new Font(Directory.GetCurrentDirectory() + "/data/font.ttf");
-            score.Font = font;
-            score.CharacterSize = 32;
-            score.DisplayedString = playerPoints.ToString();
-            highScore = new Text();
-            highScore.Position = new Vector2f(20, WorldRules.WindowHeight - 60);
-            highScore.Color = Color.Black;
-            highScore.Font = font;
-            highScore.CharacterSize = 32;
-            highScore.DisplayedString = playerPoints.ToString();
+
+            InitUI();
+
+            
             mainWindow.Closed += EventClosed;
 
             // player plays
@@ -75,12 +65,42 @@ namespace NeuralBird
             
             mainWindow.KeyPressed += EventKeyPressed;
 
-            // DEBUG
+
             ResetGame();
 
-            // END DEBUG
-
             MainLoop();
+        }
+
+        private static void InitUI()
+        {
+            score = new Text();
+            score.Position = new Vector2f(20, WorldRules.WindowHeight - 100);
+            score.Color = Color.Black;
+            Font font = new Font(Directory.GetCurrentDirectory() + "/data/font.ttf");
+            score.Font = font;
+            score.CharacterSize = 32;
+            score.DisplayedString = playerPoints.ToString();
+
+            highScore = new Text();
+            highScore.Position = new Vector2f(20, WorldRules.WindowHeight - 60);
+            highScore.Color = Color.Black;
+            highScore.Font = font;
+            highScore.CharacterSize = 32;
+            highScore.DisplayedString = playerPoints.ToString();
+
+            help = new Text();
+            help.Position = new Vector2f(WorldRules.WindowWidth - 300, WorldRules.WindowHeight - 60);
+            help.Color = Color.Black;
+            help.Font = font;
+            help.CharacterSize = 32;
+            help.DisplayedString = "Change game speed (plus/minus)";
+
+            help2 = new Text();
+            help2.Position = new Vector2f(WorldRules.WindowWidth - 300, WorldRules.WindowHeight - 100);
+            help2.Color = Color.Black;
+            help2.Font = font;
+            help2.CharacterSize = 32;
+            help2.DisplayedString = "Save all bird behaviour (S)";
         }
 
         private static void PlayerChoiceMenu()
@@ -91,9 +111,10 @@ namespace NeuralBird
             {
                 Console.Clear();
                 Console.WriteLine("-- NEURAL NETWORK FLAPPY BIRD --");
-                Console.WriteLine("1 - play flappy bird yourself");
-                Console.WriteLine("2 - let neural network learn how to play");
-                Console.WriteLine("3 - let pretrained neural network play");
+                Console.WriteLine("1 - Play flappy bird yourself");
+                Console.WriteLine("2 - Let neural network learn how to play");
+                Console.WriteLine("3 - Let pretrained neural network play");
+                Console.WriteLine("4 - Help!");
                 Console.Write(" >> ");
                 string input = Console.ReadLine();
 
@@ -106,12 +127,34 @@ namespace NeuralBird
                         case 1:
                             isPlayerPlaying = true;
                             break;
+
                         case 2:
                             isPlayerPlaying = false;
                             break;
+
                         case 3:
                             isPlayerPlaying = false;
                             isPretrained = true;
+                            break;
+
+                        case 4:
+                            Console.Clear();
+                            Console.WriteLine("-- NEURAL NETWORK FLAPPY BIRD --\n\n" +
+                                "This is a flappy bird clone game with a neural network AI implementation. \n\n" +
+                                "The birds all spawn with random neural network behaviours and are given certain elements of the world as input (their position, velocity, the distance to the next pipe and the position of the center of the pipe's gap). \n" +
+                                "There are " + WorldRules.BirdsPerGeneration + " birds per generation, each having its own independant network. " +
+                                "After all birds lose the game, a new generation of birds is created. Every bird has a chance to be picked again equal to their score in comparison with the total combined score of all birds. The greater their score the higher the chance that they will be picked again for the next generation. \nAll birds have a chance to mutate their network's behaviour when picked. Every bird's network has a " + (WorldRules.MutationChance * 100).ToString("0.##") +"% chance to mutate random neurons, slightly tweaking their behaviour.\n" +
+                                "The overall best bird of all previous generations is always picked.\n\n\n" +
+                                "If the player is playing the game, jumping is done by hitting the Space key.\n" +
+                                "Game simulation speed can be altered with the plus and minus keys while the network plays.\n" +
+                                "All birds' network behaviour can be saved with the S key at any time while the network plays. This will save to the default save file (saved.brains). This will override the previous network save\n\n" +
+                                "Press any key to continue");
+                            Console.ReadKey();
+                            i = 0;
+                            break;
+
+                        default:
+                            i = 0;
                             break;
                     }
 
@@ -208,7 +251,7 @@ namespace NeuralBird
         private static void LoadNetworks()
         {
             XmlSerializer ser = new XmlSerializer(typeof(List<SerializableWeights>));
-            var fStream = new FileStream(Directory.GetCurrentDirectory() + "/data/saved.brains", FileMode.Open, FileAccess.Read, FileShare.None);
+            var fStream = new FileStream(Directory.GetCurrentDirectory() + "/data/pretrained.brains", FileMode.Open, FileAccess.Read, FileShare.None);
             List<SerializableWeights> newWeightsList = (List < SerializableWeights > )ser.Deserialize(fStream);
             int counter = 0;
 
@@ -281,6 +324,7 @@ namespace NeuralBird
                 highScorePoints = playerPoints;
             }
 
+            // delete objects that are out of bounds or dead
             for (int i = 0; i < gameObjects.Count; i++)
             {
                 if(gameObjects.ElementAt(i) is Pipe)
@@ -310,8 +354,10 @@ namespace NeuralBird
         private static void NewGeneration()
         {
             gameObjects.Clear();
-            double maxScore = 0;
 
+
+            // update scores, highscore and keep track of the best performing bird from all previous generations
+            double maxScore = 0;
             double scoreSum = 0;
             foreach (var bird in deadBirds)
             {
@@ -323,12 +369,7 @@ namespace NeuralBird
                 scoreSum += bird.Points;
             }
 
-
-
-            // sort by points
-            //deadBirds = deadBirds.OrderBy(o => o.Points).ToList();
-            //deadBirds.Reverse();
-
+            // add birds with their pick probability depending on their score
             List<KeyValuePair<Bird, double>> elements = new List<KeyValuePair<Bird, double>>();
             foreach (Bird bird in deadBirds)
             {
@@ -337,7 +378,7 @@ namespace NeuralBird
 
 
 
-
+            // pick new birds, higher scoring birds have greater chances of being picked
             Bird pickedBird = null;
             for (int i = 0; i < WorldRules.BirdsPerGeneration -1; i++)
             {
@@ -361,14 +402,8 @@ namespace NeuralBird
                 bird.brain.SetGenes(pickedBird.brain.GetGenes());
                 bird.brain = pickedBird.brain;
 
-                //int chosenBirdBrain = i / 2;
-
-                //INeuralNetwork network;
-                //network = NeuralNetworkFactory.GetInstance().Create(deadBirds.ElementAt(chosenBirdBrain).brain.network.GetGenes());
-                //obj.brain.network = network;
-
-                //bird.brain.SetGenes(obj.brain.Network.GetGenes());
-                //bird.brain.Mutate();
+                
+                // in case all birds do very poorly, reset every bird to a new network
                 if (maxScore < 200)
                 {
                     bird = new Bird();
@@ -377,20 +412,16 @@ namespace NeuralBird
                 playerBird = bird;
             }
 
-            // elitism
+            // elitism, the best bird from all generations is always picked
             Bird bestBirdAlltime = new Bird();
             bestBirdAlltime.brain.SetGenes(bestNetworkWeightsAlltime);
             gameObjects.Add(bestBirdAlltime);
 
             numberOfAliveBirds = WorldRules.BirdsPerGeneration;
 
-            //for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
-            //{
-            //    var obj = new Bird();
-            //    gameObjects.Add(obj);
-            //}
-            //numberOfAliveBirds = WorldRules.BirdsPerGeneration;
 
+
+            // we reset the whole run, this includes new pipes
             var pipe = new Pipe();
             pipe.Position += new Vector2f(0, 0);
             gameObjects.Add(pipe);
@@ -417,6 +448,7 @@ namespace NeuralBird
             }
             else
             {
+                // make sure to load in pretrained networks if load is selected
                 if (isPretrained)
                 {
                     Bird obj;
@@ -429,6 +461,7 @@ namespace NeuralBird
 
                     LoadNetworks();
                 }
+                // in case this is a fresh start, add new birds with random networks
                 else
                 {
                     Bird obj;
@@ -442,6 +475,8 @@ namespace NeuralBird
                 
                 numberOfAliveBirds = WorldRules.BirdsPerGeneration;
             }
+
+            // add the pipes at the end
 
             var pipe = new Pipe();
             pipe.Position += new Vector2f(0, 0);
@@ -471,6 +506,11 @@ namespace NeuralBird
             mainWindow.Draw(score);
             highScore.DisplayedString = "Best:      " + highScorePoints.ToString();
             mainWindow.Draw(highScore);
+            if (!isPlayerPlaying)
+            {
+                mainWindow.Draw(help);
+                mainWindow.Draw(help2);
+            }
 
 
             mainWindow.Display();

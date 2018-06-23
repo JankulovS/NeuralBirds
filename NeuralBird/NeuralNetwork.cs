@@ -59,7 +59,6 @@ namespace NeuralBird
         public double[,] output;
 
         public WeightsInfo Weights = new WeightsInfo();
-        //WeightsInfo nextWeights = new WeightsInfo();
 
         public NeuralNetwork()
         {
@@ -67,6 +66,7 @@ namespace NeuralBird
             rand = new Random(_id);
             InitNetwork();
         }
+
 
         public void InitNetwork()
         {
@@ -94,20 +94,23 @@ namespace NeuralBird
             input[0, 1] = dist;
             input[0, 2] = pipeY;
             input[0, 3] = velocity;
-
-            //double[,] output;
+            
 
             double[,] hiddenInputs = multiplyArrays(input, Weights.weights1);
             double[,] hiddenOutputs = applySigmoid(hiddenInputs);
 
-            // then the final output
+            // calculate output certainty
             output = applySigmoid(multiplyArrays(hiddenOutputs, Weights.weights2));
 
             return output[0,0];
         }
 
 
+
+
         // NN math functions
+
+
         double[,] applySigmoid(double[,] array)
         {
             for (int i = 0; i < array.GetLength(0); i++)
@@ -136,6 +139,7 @@ namespace NeuralBird
             return a3;
         }
 
+        // slightly tweak weights so new behaviour arrises or old gets refined (or degraded)
         internal void Mutate()
         {
             if (rand.NextDouble() < WorldRules.MutationChance)
