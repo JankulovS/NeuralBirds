@@ -7,42 +7,58 @@ using System.Threading.Tasks;
 namespace NeuralBird
 {
     [Serializable]
+    public class WeightsInfo
+    {
+        // hidden layer weights
+        public double[,] weights1;
+
+        // output layer weights
+        public double[,] weights2;
+        
+
+        public WeightsInfo(double[,] weights1, double[,] weights2)
+        {
+            double[,] _weights1 = new double[weights1.GetLength(0), weights1.GetLength(1)];
+            double[,] _weights2 = new double[weights2.GetLength(0), weights2.GetLength(1)];
+
+
+            for (int i = 0; i < weights1.GetLength(0); i++)
+                for (int j = 0; j < weights1.GetLength(1); j++)
+                    _weights1[i, j] = weights1[i, j];
+
+
+            for (int i = 0; i < weights2.GetLength(0); i++)
+                for (int j = 0; j < weights2.GetLength(1); j++)
+                    _weights2[i, j] = weights2[i, j];
+
+            this.weights1 = _weights1;
+            this.weights2 = _weights2;
+        }
+
+        public WeightsInfo()
+        {
+            this.weights1 = new double[NeuralNetwork.inputSize, NeuralNetwork.hiddenSize];
+            this.weights2 = new double[NeuralNetwork.hiddenSize, NeuralNetwork.outputSize];
+        }
+    }
+
+    [Serializable]
     public class NeuralNetwork
     {
-        private static int inputSize = 4;
-        private static int hiddenSize = 2;
-        private static int outputSize = 1;
+        public static int inputSize = 4;
+        public static int hiddenSize = 5;
+        public static int outputSize = 1;
         public int _id;
         private static int _nextId = 0;
         Random rand;
 
-        [Serializable]
-        public class WeightsInfo
-        {
-            // hidden layer weights
-            public double[,] weights1;
 
-            // output layer weights
-            public double[,] weights2;
-
-            public WeightsInfo(double[,] weights1, double[,] weights2)
-            {
-                this.weights1 = weights1;
-                this.weights2 = weights2;
-            }
-
-            public WeightsInfo()
-            {
-                this.weights1 = new double[inputSize, hiddenSize];
-                this.weights2 = new double[hiddenSize, outputSize];
-            }
-        }
 
 
         double[,] input;
         public double[,] output;
 
-        WeightsInfo weights = new WeightsInfo();
+        public WeightsInfo Weights = new WeightsInfo();
         //WeightsInfo nextWeights = new WeightsInfo();
 
         public NeuralNetwork()
@@ -67,8 +83,8 @@ namespace NeuralBird
                 for (int j = 0; j < _weights2.GetLength(1); j++)
                     _weights2[i, j] = rand.NextDouble() * 2 - 1;
 
-            weights.weights1 = _weights1;
-            weights.weights2 = _weights2;
+            Weights.weights1 = _weights1;
+            Weights.weights2 = _weights2;
         }
 
         public double Process(double y, double dist, double pipeY, double velocity)
@@ -81,11 +97,11 @@ namespace NeuralBird
 
             //double[,] output;
 
-            double[,] hiddenInputs = multiplyArrays(input, weights.weights1);
+            double[,] hiddenInputs = multiplyArrays(input, Weights.weights1);
             double[,] hiddenOutputs = applySigmoid(hiddenInputs);
 
             // then the final output
-            output = applySigmoid(multiplyArrays(hiddenOutputs, weights.weights2));
+            output = applySigmoid(multiplyArrays(hiddenOutputs, Weights.weights2));
 
             return output[0,0];
         }
@@ -118,6 +134,27 @@ namespace NeuralBird
                         a3[i, j] = a3[i, j] + a1[i, k] * a2[k, j];
                 }
             return a3;
+        }
+
+        internal void Mutate()
+        {
+            if (rand.NextDouble() < WorldRules.MutationChance)
+            {
+                for (int i = 0; i < Weights.weights1.GetLength(0); i++)
+                    for (int j = 0; j < Weights.weights1.GetLength(1); j++)
+                      if (rand.NextDouble() < 0.5)
+                          Weights.weights1[i,j] += WorldRules.MutationSeverity;
+                      else
+                          Weights.weights1[i,j] -= WorldRules.MutationSeverity;
+
+                for (int i = 0; i < Weights.weights2.GetLength(0); i++)
+                    for (int j = 0; j < Weights.weights2.GetLength(1); j++)
+                        if (rand.NextDouble() < 0.5)
+                            Weights.weights2[i, j] += WorldRules.MutationSeverity;
+                        else
+                            Weights.weights2[i, j] -= WorldRules.MutationSeverity;
+
+            }
         }
     }
 }

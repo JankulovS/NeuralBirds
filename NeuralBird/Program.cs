@@ -41,6 +41,7 @@ namespace NeuralBird
         public static List<Bird> deadBirds = new List<Bird>();
         public static int highScorePoints = 0;
         public static bool isPretrained = false;
+        public static WeightsInfo bestNetworkWeightsAlltime;
 
         static void Main(string[] args)
         {
@@ -171,91 +172,54 @@ namespace NeuralBird
 
         private static void SaveNetworks()
         {
-            XmlSerializer ser = new XmlSerializer(typeof(List<Gene>));
+            XmlSerializer ser = new XmlSerializer(typeof(List<SerializableWeights>));
             var fStream = new FileStream(Directory.GetCurrentDirectory() + "/data/saved.brains", FileMode.Create, FileAccess.Write, FileShare.None);
-            List<Gene> newHiddenGenes = new List<Gene>(); ;
+            List<SerializableWeights> newWeightsList = new List<SerializableWeights>();
+
+            
 
             // alive birds
-            //foreach (var bird in gameObjects)
-            //{
-            //    if (bird is Bird)
-            //    {
-
-            //        var hiddenGenes = ((Bird)bird).brain.Network.GetGenes().HiddenGenes;
-            //        Gene newGene;
-            //        foreach(var gene in hiddenGenes)
-            //        {
-            //            newGene = new Gene();
-            //            var newWeights = new List<List<Double>>();
-            //            var newBias = new List<Double>();
-            //            foreach(var neuron in gene.Neurons)
-            //            {
-            //                newWeights.Add(neuron.Axon.Weights.ToList());
-            //                newBias.Add(neuron.Soma.Bias);
-            //            }
-            //            newGene.Bias = newBias;
-            //            newGene.Weights = newWeights;
-
-            //            newHiddenGenes.Add(newGene);
-            //        }
-            //    }
-            //}
+            foreach (var bird in gameObjects)
+            {
+                if (bird is Bird)
+                {
+                    SerializableWeights weights = new SerializableWeights(((Bird)bird).brain.GetGenes());
+                    newWeightsList.Add(weights);
+                }
+            }
 
             // dead birds
-            //foreach (var bird in deadBirds)
-            //{
-            //    if (bird is Bird)
-            //    {
+            foreach (var bird in deadBirds)
+            {
+                if (bird is Bird)
+                {
 
-            //        var hiddenGenes = ((Bird)bird).brain.Network.GetGenes().HiddenGenes;
-            //        Gene newGene;
-            //        foreach (var gene in hiddenGenes)
-            //        {
-            //            newGene = new Gene();
-            //            var newWeights = new List<List<Double>>();
-            //            var newBias = new List<Double>();
-            //            foreach (var neuron in gene.Neurons)
-            //            {
-            //                newWeights.Add(neuron.Axon.Weights.ToList());
-            //                newBias.Add(neuron.Soma.Bias);
-            //            }
-            //            newGene.Bias = newBias;
-            //            newGene.Weights = newWeights;
+                    SerializableWeights weights = new SerializableWeights(((Bird)bird).brain.GetGenes());
+                    newWeightsList.Add(weights);
+                }
+            }
 
-            //            newHiddenGenes.Add(newGene);
-            //        }
-            //    }
-            //}
-
-            ser.Serialize(fStream, newHiddenGenes);
+            ser.Serialize(fStream, newWeightsList);
             fStream.Close();
 
-            Console.WriteLine("Current network network genes saved!");
+            Console.WriteLine("Network genes saved!");
         }
 
         private static void LoadNetworks()
         {
-            XmlSerializer ser = new XmlSerializer(typeof(List<Gene>));
+            XmlSerializer ser = new XmlSerializer(typeof(List<SerializableWeights>));
             var fStream = new FileStream(Directory.GetCurrentDirectory() + "/data/saved.brains", FileMode.Open, FileAccess.Read, FileShare.None);
-            List<Gene> newGenes = (List < Gene > )ser.Deserialize(fStream);
+            List<SerializableWeights> newWeightsList = (List < SerializableWeights > )ser.Deserialize(fStream);
             int counter = 0;
 
-            //foreach (var bird in gameObjects)
-            //{
-            //    if (bird is Bird)
-            //    {
-            //        var genes = ((Bird)bird).brain.Network.GetGenes();
-            //        foreach(var gene in genes.HiddenGenes)
-            //        {
-            //            for(int j = 0; j < gene.Neurons.Count; j++)
-            //            {
-            //                gene.Neurons.ElementAt(j).Axon.Weights = newGenes.ElementAt(counter).Weights.ElementAt(j);
-            //                gene.Neurons.ElementAt(j).Soma.Bias = newGenes.ElementAt(counter).Bias.ElementAt(j);
-            //            }
-            //        }
-            //        counter++;
-            //    }
-            //}
+            foreach (var bird in gameObjects)
+            {
+                if (bird is Bird)
+                {
+                    ((Bird)bird).brain.SetGenes(newWeightsList.ElementAt(counter).ToWeightsInfo());
+                    counter++;
+                }
+            }
 
             Console.WriteLine("Loaded neural network genes");
         }
@@ -354,6 +318,7 @@ namespace NeuralBird
                 if (bird.Points > maxScore)
                 {
                     maxScore = bird.Points;
+                    bestNetworkWeightsAlltime = new WeightsInfo(bird.brain.Network.Weights.weights1, bird.brain.Network.Weights.weights2);
                 }
                 scoreSum += bird.Points;
             }
@@ -373,8 +338,8 @@ namespace NeuralBird
 
 
 
-            Bird obj = null;
-            for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)
+            Bird pickedBird = null;
+            for (int i = 0; i < WorldRules.BirdsPerGeneration -1; i++)
             {
                 Bird bird = new Bird();
 
@@ -387,10 +352,14 @@ namespace NeuralBird
                     cumulative += elements[j].Value;
                     if (diceRoll < cumulative)
                     {
-                        obj = elements[j].Key;
+                        pickedBird = elements[j].Key;
                         break;
                     }
                 }
+
+                pickedBird.brain.Network.Mutate();
+                bird.brain.SetGenes(pickedBird.brain.GetGenes());
+                bird.brain = pickedBird.brain;
 
                 //int chosenBirdBrain = i / 2;
 
@@ -400,13 +369,19 @@ namespace NeuralBird
 
                 //bird.brain.SetGenes(obj.brain.Network.GetGenes());
                 //bird.brain.Mutate();
-                //if (maxScore < 200)
-                //{
-                //    bird = new Bird();
-                //}
+                if (maxScore < 200)
+                {
+                    bird = new Bird();
+                }
                 gameObjects.Add(bird);
                 playerBird = bird;
             }
+
+            // elitism
+            Bird bestBirdAlltime = new Bird();
+            bestBirdAlltime.brain.SetGenes(bestNetworkWeightsAlltime);
+            gameObjects.Add(bestBirdAlltime);
+
             numberOfAliveBirds = WorldRules.BirdsPerGeneration;
 
             //for (int i = 0; i < WorldRules.BirdsPerGeneration; i++)

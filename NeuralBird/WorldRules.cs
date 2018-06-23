@@ -21,6 +21,8 @@ namespace NeuralBird
 
         // neural network rules
         public const int BirdsPerGeneration = 150;
+        public const double MutationChance = 0.1;
+        public const double MutationSeverity = 0.05;
 
         // window rules
         public const uint WindowHeight = 600;

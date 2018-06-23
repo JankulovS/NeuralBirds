@@ -37,9 +37,9 @@ namespace NeuralBird
             //Mutate();
         }
 
-        public void SetGenes(NeuralNetworkGene genes)
+        public void SetGenes(WeightsInfo weights)
         {
-            //Network = factory.Create(genes);
+            Network.Weights = new WeightsInfo(weights.weights1, weights.weights2);
         }
 
         double Lerp(double v0, double v1, double t)
@@ -115,6 +115,10 @@ namespace NeuralBird
 
             //Network = //NeuralNetworkFactory.GetInstance().Create(genes);
         }
-        
+
+        internal WeightsInfo GetGenes()
+        {
+            return Network.Weights;
+        }
     }
 }

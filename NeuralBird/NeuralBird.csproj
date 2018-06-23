@@ -81,6 +81,7 @@
     <Compile Include="Pipe.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializableWeights.cs" />
     <Compile Include="WorldRules.cs" />
   </ItemGroup>
   <ItemGroup>
