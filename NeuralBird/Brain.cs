@@ -32,13 +32,9 @@ namespace NeuralBird
 
 
             newBird = true;
-            var numInputs = 4;
-            var numOutputs = 1;
-            //var numHiddenLayers = 2;
-            var numNeuronsInHiddenLayer = 5;
-            Network = new NeuralNetwork(numInputs, numNeuronsInHiddenLayer, numOutputs);
+            Network = new NeuralNetwork();
 
-            Mutate();
+            //Mutate();
         }
 
         public void SetGenes(NeuralNetworkGene genes)
@@ -54,14 +50,16 @@ namespace NeuralBird
         // this function returns the network's prediction (0 or 1)
         public int Think(double birdY, double dist, double pipeY, double verticalSpeed)
         {
-            double[] inputs = { birdY / WorldRules.WindowHeight, dist / WorldRules.WindowWidth, pipeY/ WorldRules.WindowHeight, verticalSpeed / WorldRules.MaxSpeed};
+            double[] inputs = { birdY / WorldRules.WindowHeight, dist / WorldRules.WindowWidth, pipeY / WorldRules.WindowHeight, verticalSpeed / WorldRules.MaxSpeed };
             //double[] inputs = { birdY, dist, pipeY, verticalSpeed };
             //Network.SetInputs(inputs);
             //Network.Process();
-            double[] outputs = { Program.rand.NextDouble() * 2 - 1 };//Network.GetOutputs();
+            
+            double output = Network.Process(inputs[0], inputs[1], inputs[2], inputs[3]);
+            //Console.WriteLine("network id: " + Network._id);
 
             //if (Lerp(0,1,(outputs[0] + 1)/2) > Program.rand.NextDouble() / 2 + 0.5)
-            if (Lerp(0, 1, (outputs[0] + 1) / 2) > 0.5)
+            if (output > 0.5)
             {
                 return 1;
             }

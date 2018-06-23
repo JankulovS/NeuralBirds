@@ -105,6 +105,7 @@ namespace NeuralBird
                 int decision = brain.Think(Position.Y, closestPipeDist, closestPipeY, Velocity.Y);
                 //Console.WriteLine("Bird id: " + id + "  output: "+brain.network.GetOutputs()[0]);
                 //Console.WriteLine("PipeY: " + closestPipeY + " BirdY: " + Position.Y + "\nBirdVelocity: " + Velocity.Y);
+                //Console.WriteLine("brain id: " + brain.Network._id + " output: " + brain.Network.output[0,0]);
                 switch (decision)
                 {
                     case 0:

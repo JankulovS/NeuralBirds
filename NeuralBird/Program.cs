@@ -400,10 +400,10 @@ namespace NeuralBird
 
                 //bird.brain.SetGenes(obj.brain.Network.GetGenes());
                 //bird.brain.Mutate();
-                if (maxScore < 200)
-                {
-                    bird = new Bird();
-                }
+                //if (maxScore < 200)
+                //{
+                //    bird = new Bird();
+                //}
                 gameObjects.Add(bird);
                 playerBird = bird;
             }
